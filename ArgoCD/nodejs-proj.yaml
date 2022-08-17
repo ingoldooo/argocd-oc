@@ -18,5 +18,5 @@ spec:
     - group: '*'
       kind: '*'
   sourceRepos:
-    - 'https://github.com/Tal-Hason/NodeJS-deployment-demo.git'
+    - 'https://github.com/ingoldooo/argocd-oc.git'
 status: {}

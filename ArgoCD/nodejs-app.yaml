@@ -10,7 +10,7 @@ spec:
   project: nodejs-app
   source:
     path: ./Helm
-    repoURL: https://github.com/Tal-Hason/NodeJS-deployment-demo.git
+    repoURL: https://github.com/ingoldooo/argocd-oc.git
     targetRevision: main
   syncPolicy:
     automated:

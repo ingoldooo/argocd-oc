@@ -29,7 +29,7 @@ spec:
       description: Where you want the applicaion to deploy
       name: namespace
       type: string
-    - default: 'https://github.com/Tal-Hason/NodeJS-deployment-demo.git'
+    - default: 'https://github.com/ingoldooo/argocd-oc.git'
       description: Full reposrepository Name
       name: git-full-url
       type: string

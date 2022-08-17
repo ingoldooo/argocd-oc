@@ -28,7 +28,7 @@ spec:
     - default: nodejs
       name: APP_NAME
       type: string
-    - default: 'https://github.com/Tal-Hason/NodeJS-deployment-demo.git'
+    - default: 'https://github.com/ingoldooo/argocd-oc.git'
       name: GIT_REPO
       type: string
     - default: main
