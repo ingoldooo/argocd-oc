@@ -1,0 +1,91 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: update-argocd-proj
+spec:
+  params:
+    - default: github.com
+      description: where your repo is hosted exam (like "github.com" )
+      name: git-url-source
+      type: string
+    - default: Tal-Hason
+      description: Your GIT User name
+      name: git-user
+      type: string
+    - default: NodeJS-deployment-demo
+      description: Your GIT Repository name
+      name: git-repo-name
+      type: string
+    - default: latest
+      name: tag
+      type: string
+    - default: main
+      name: branch
+      type: string
+    - default: nodejs-app
+      name: project-name
+      type: string
+    - default: git-user
+      name: git-secret-name
+      type: string
+    - default: nodejs-demo
+      description: Where you want the applicaion to deploy
+      name: namespace
+      type: string
+    - default: 'https://github.com/Tal-Hason/NodeJS-deployment-demo.git'
+      description: Full reposrepository Name
+      name: git-full-url
+      type: string
+  steps:
+    - args:
+        - '-c'
+        - >
+          set -ex
+
+          mkdir workspace
+
+          cd workspace
+
+          git config --global user.email "tekton@pipeline.com"
+
+          git config --global user.name "$(params.git-user)"
+
+          git clone
+          https://$(params.git-url-source)/$(params.git-user)/$(params.git-repo-name).git
+          app
+
+          cd app 
+
+          git remote set-url origin
+          https://$GIT_TOKEN:x-oauth-basic@$(params.git-url-source)/$(params.git-user)/$(params.git-repo-name).git
+
+          sed -i 's/xxxNameSpacexxx/$(params.namespace)/g' ArgoCD/nodejs-proj.yaml
+          
+          sed -i 's;xxxProjectNamexxx;$(params.project-name);g' ArgoCD/nodejs-proj.yaml
+
+          sed -i 's;xxxRepositoryxxx;$(params.git-full-url);g' ArgoCD/nodejs-proj.yaml
+
+          cp -f ./ArgoCD/nodejs-proj.yaml ./ArgoCD/deploys/Proj
+
+          git add .
+
+          git commit -m "Added ArgoCD proj to Repo"
+
+          git push 
+
+      command:
+        - /bin/bash
+      env:
+        - name: GIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: $(params.git-secret-name)
+        - name: GIT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: $(params.git-secret-name)
+      image: 'quay.io/thason/pipeline:latest'
+      name: update-argocd-proj
+      resources: {}

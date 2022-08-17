@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: update-argocd-app
+spec:
+  params:
+    - default: github.com
+      description: where your repo is hosted exam (like "github.com" )
+      name: git-url-source
+      type: string
+    - default: Tal-Hason
+      description: Your GIT User name
+      name: git-user
+      type: string
+    - default: NodeJS-deployment-demo
+      description: Your GIT Repository name
+      name: git-repo-name
+      type: string
+    - default: latest
+      name: tag
+      type: string
+    - default: app
+      name: branch
+      type: string
+    - default: git-user
+      name: git-secret-name
+      type: string
+    - default: nodejs-demo
+      description: Where you want the applicaion to deploy
+      name: namespace
+      type: string
+    - default: 'https://github.com/Tal-Hason/NodeJS-deployment-demo.git'
+      description: Full reposrepository Name
+      name: git-full-url
+      type: string
+    - default: nodejs-app
+      name: project-name
+      type: string
+    - default: nodejs
+      name: application-name
+      type: string
+  steps:
+    - args:
+        - '-c'
+        - >
+          set -ex
+
+          mkdir workspace
+
+          cd workspace
+
+          git config --global user.email "tekton@pipeline.com"
+
+          git config --global user.name "$(params.git-user)"
+
+          git clone
+          https://$(params.git-url-source)/$(params.git-user)/$(params.git-repo-name).git
+          app
+
+          cd app 
+
+          git remote set-url origin
+          https://$GIT_TOKEN:x-oauth-basic@$(params.git-url-source)/$(params.git-user)/$(params.git-repo-name).git
+          
+          sed -i 's/xxxAppNamexxx/$(params.application-name)/g'  ArgoCD/nodejs-app.yaml
+          
+          sed -i 's/xxxNameSpacexxx/$(params.namespace)/g'  ArgoCD/nodejs-app.yaml
+
+          sed -i 's;xxxRepoUrlxxx;$(params.git-full-url);g' ArgoCD/nodejs-app.yaml
+
+          sed -i 's/xxxBranchxxx/$(params.branch)/g' ArgoCD/nodejs-app.yaml
+
+          sed -i 's/xxxProjectNamexxx/$(params.project-name)/g' ArgoCD/nodejs-app.yaml
+
+          cp -f ./ArgoCD/nodejs-app.yaml ./ArgoCD/deploys/Apps
+
+          git add .
+
+          git commit -m "Added ArgoCD app to Repo"
+
+          git push 
+
+      command:
+        - /bin/bash
+      env:
+        - name: GIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: $(params.git-secret-name)
+        - name: GIT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: $(params.git-secret-name)
+      image: 'quay.io/thason/pipeline:latest'
+      name: update-argocd-app
+      resources: {}

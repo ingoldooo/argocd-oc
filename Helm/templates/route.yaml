@@ -1,0 +1,17 @@
+{{- $fullName := include "nodejs.fullname" . -}}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "nodejs.labels" . | nindent 4 }}
+spec:
+  host: nodejs-demo-hello-world-1.apps-crc.testing
+  to:
+    kind: Service
+    name: {{ include "nodejs.fullname" . }}
+    weight: 100
+  port:
+    targetPort: http
+  wildcardPolicy: None
+

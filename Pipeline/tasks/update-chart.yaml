@@ -1,0 +1,73 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: update-chart
+spec:
+  params:
+    - default: github.com
+      description: where your repo is hosted exam (like "github.com" )
+      name: git-url-source
+      type: string
+    - default: Tal-Hason
+      description: Your GIT User name
+      name: git-user
+      type: string
+    - default: NodeJS-deployment-demo
+      description: Your GIT Repository name
+      name: git-repo-name
+      type: string
+    - default: latest
+      name: tag
+      type: string
+    - default: app
+      name: branch
+      type: string
+    - default: git-user
+      name: git-secret-name
+      type: string
+  steps:
+    - args:
+        - '-c'
+        - >
+          set -ex
+
+          mkdir workspace
+
+          cd workspace
+
+          git config --global user.email "tekton@pipeline.com"
+
+          git config --global user.name "$(params.git-user)"
+
+          git clone
+          https://$(params.git-url-source)/$(params.git-user)/$(params.git-repo-name).git
+          app
+
+          cd app 
+
+          git remote set-url origin
+          https://$GIT_TOKEN:x-oauth-basic@$(params.git-url-source)/$(params.git-user)/$(params.git-repo-name).git
+
+          sed 's/XXX/$(params.tag)/g' Helm/Chart-no-tag > Helm/Chart.yaml
+
+          git add .
+
+          git commit -m "update Chart image version"
+
+          git push 
+      command:
+        - /bin/bash
+      env:
+        - name: GIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: $(params.git-secret-name)
+        - name: GIT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: $(params.git-secret-name)
+      image: 'quay.io/thason/pipeline:latest'
+      name: update-chart-app-ver
+      resources: {}
